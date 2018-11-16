@@ -19,3 +19,7 @@ python manage.py shell
 # Crear super usuario
 
 python manage.py createsuperuser
+
+# Encontrar archivos fuentes DJango
+
+python -c "import django; print(django.__path__)"
