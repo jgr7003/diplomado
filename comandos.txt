@@ -1,0 +1,21 @@
+# Iniciar servidor
+
+python manage.py runserver {Port}
+
+python manage.py check
+
+# Migraciones
+
+python manage.py makemigrations polls
+
+python manage.py migrate
+
+python manage.py sqlmigrate polls 0001
+
+# API base de datos por consola
+
+python manage.py shell
+
+# Crear super usuario
+
+python manage.py createsuperuser
