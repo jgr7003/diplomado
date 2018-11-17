@@ -23,3 +23,11 @@ python manage.py createsuperuser
 # Encontrar archivos fuentes DJango
 
 python -c "import django; print(django.__path__)"
+
+# Iniciar proyecto
+
+django-admin startproject mysite
+
+# Crear aplicacion
+
+python manage.py startapp polls

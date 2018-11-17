@@ -1,0 +1,50 @@
+<head>
+{% load static %}
+<link rel="stylesheet" href="{% static 'mapas/jqvmap/jqvmap.css' %}" />
+
+<script src="{% static 'mapas/js/jquery/jquery.js' %}"></script>
+<script src="{% static 'mapas/jqvmap/jquery.vmap.js' %}"></script>
+<script src="{% static 'mapas/jqvmap/data/jquery.vmap.sampledata.js' %}"></script>
+<script src="{% static 'mapas/jqvmap/maps/continents/jquery.vmap.south-america.js' %}"></script>
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery('#vmap').vectorMap({
+        map: 'south-america_en',
+        backgroundColor: '#333333',
+        color: '#ffffff',
+        hoverOpacity: 0.7,
+        selectedColor: '#666666',
+        enableZoom: true,
+        showTooltip: true,
+        values: sample_data,
+        scaleColors: ['#C8EEFF', '#006491'],
+        normalizeFunction: 'polynomial',
+        onRegionClick: function(element, code, region)
+        {
+            jQuery('#Pais').val(region);
+            jQuery('#frmAnalizar').submit();
+        },
+
+        onRegionOver: function(element, code, region)
+        {
+            /*var message = 'You estas encima de  "'
+                + region
+                + '" which has the code: '
+                + code.toUpperCase();
+
+            alert(message);*/
+        }
+    });
+});
+</script>
+</head>
+<body>
+<div id="vmap" style="width: 100%; height: 400px;"></div>
+
+<form action="{% url 'analisis:index' %}" name="frmAnalizar" id="frmAnalizar" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="Pais" id="Pais">
+</form>
+
+</body>
