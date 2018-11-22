@@ -103,7 +103,7 @@ def make_patch_spines_invisible(ax):
     for sp in ax.spines.values():
         sp.set_visible(False)
 
-def graficar_multiple(selvatica, gases, poblacion, pais, guardar_como):
+def graficar_multiple(selvatica, gases, poblacion, pais, guardar_como, desde, hasta):
 
     fig, host = plt.subplots()
     fig.subplots_adjust(right=0.75)
@@ -123,9 +123,9 @@ def graficar_multiple(selvatica, gases, poblacion, pais, guardar_como):
     # Second, show the right spine.
     par2.spines["right"].set_visible(True)
 
-    areselva_1990_2000 = selvatica.loc[pais, '1990':'2000']
-    gases_1990_2000 = gases.loc[pais, '1990':'2000']
-    poblacion_1990_2000 = poblacion.loc[pais, '1990':'2000']
+    areselva_1990_2000 = selvatica.loc[pais, desde:hasta]
+    gases_1990_2000 = gases.loc[pais, desde:hasta]
+    poblacion_1990_2000 = poblacion.loc[pais, desde:hasta]
 
     p1, = host.plot(areselva_1990_2000.index, areselva_1990_2000.values, "b-", label="Área selvatica")
     p2, = par1.plot(gases_1990_2000.index, gases_1990_2000.values, "r-", label="Gases efecto invernadero")
@@ -161,9 +161,9 @@ def index(request):
         return HttpResponseRedirect(reverse('mapas:index'))
 
     # MacOS
-    # ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
+    ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
     # Windows
-    ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
+    # ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
 
     area_selvatica = volcar(ruta+'files/area_selvatica.csv', ',')
     poblacion_urbana = volcar(ruta+'files/poblacion_urbana.csv', ',')
@@ -241,10 +241,44 @@ def index(request):
 
     graficar_deforestacion(grupo_por_anio.index, dentro_de_10_km, fuera_de_10_km, ruta + 'images/' + png_deforestacion)
 
-    png_comparativo = 'comparativo_' + request.POST['Pais'] + '.png'
-    graficar_multiple(area_selvatica, gases_efecto_invernadero, poblacion_urbana, request.POST['Pais'], ruta + 'images/' + png_comparativo)
-
     # Fin deforestación
+
+    # Inicio comparativo
+
+    png_comparativo_1990_2000 = 'comparativo_' + request.POST['Pais'] + '_1990_2000.png'
+    graficar_multiple(
+        area_selvatica,
+        gases_efecto_invernadero,
+        poblacion_urbana,
+        request.POST['Pais'],
+        ruta + 'images/' + png_comparativo_1990_2000,
+        '1990',
+        '2000'
+    )
+
+    png_comparativo_2000_2010 = 'comparativo_' + request.POST['Pais'] + '_2000_2010.png'
+    graficar_multiple(
+        area_selvatica,
+        gases_efecto_invernadero,
+        poblacion_urbana,
+        request.POST['Pais'],
+        ruta + 'images/' + png_comparativo_2000_2010,
+        '2000',
+        '2010'
+    )
+
+    png_comparativo_2010_2017 = 'comparativo_' + request.POST['Pais'] + '_2010_2017.png'
+    graficar_multiple(
+        area_selvatica,
+        gases_efecto_invernadero,
+        poblacion_urbana,
+        request.POST['Pais'],
+        ruta + 'images/' + png_comparativo_2010_2017,
+        '2010',
+        '2017'
+    )
+
+    # Fin comparativo
 
     deforestacion_pais_json_1 = grupo_por_anio.to_json(orient='split')
     deforestacion_pais_json = pd.Series(fuera_de_10_km).to_json(orient='split')
