@@ -70,8 +70,6 @@ def graficar(label_graf, label_x, label_y, titulo, guardar_como, datos, pais):
 def graficar_deforestacion(indices, datos_dentro, datos_fuera, guardar_como):
 
     # http://kitchingroup.cheme.cmu.edu/blog/2013/09/13/Plotting-two-datasets-with-very-different-scales/
-
-    # http://kitchingroup.cheme.cmu.edu/blog/2013/09/13/Plotting-two-datasets-with-very-different-scales/
     plt.figure()
     f, axes = plt.subplots(2, 1, constrained_layout=True)
 
@@ -81,13 +79,13 @@ def graficar_deforestacion(indices, datos_dentro, datos_fuera, guardar_como):
     axes[0].set_ylabel("Dentro", color='r', size=size_layouts)
     axes[0].get_yaxis().set_major_formatter(
         ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
-    axes[0].set_xlabel(label_x, color='r', size=size_layouts)
+    axes[0].set_xlabel("Año", color='r', size=size_layouts)
 
     axes[1].plot(indices, datos_fuera)
     axes[1].set_ylabel("Fuera", color='r', size=size_layouts)
     axes[1].get_yaxis().set_major_formatter(
         ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
-    axes[1].set_xlabel(label_x, color='r', size=size_layouts)
+    axes[1].set_xlabel("Año", color='r', size=size_layouts)
 
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
     axes[0].legend(["% Deforestación"])
@@ -99,6 +97,63 @@ def graficar_deforestacion(indices, datos_dentro, datos_fuera, guardar_como):
     plt.savefig(guardar_como)
     return ''
 
+def make_patch_spines_invisible(ax):
+    ax.set_frame_on(True)
+    ax.patch.set_visible(False)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+
+def graficar_multiple(selvatica, gases, poblacion, pais, guardar_como):
+
+    fig, host = plt.subplots()
+    fig.subplots_adjust(right=0.75)
+
+    par1 = host.twinx()
+    par2 = host.twinx()
+    # par3 = host.twinx()
+
+    # Offset the right spine of par2.  The ticks and label have already been
+    # placed on the right by twinx above.
+    par2.spines["right"].set_position(("axes", 1.2))
+    # par2.spines["left"].set_position(("axes", 1.2))
+    # Having been created by twinx, par2 has its frame off, so the line of its
+    # detached spine is invisible.  First, activate the frame but make the patch
+    # and spines invisible.
+    make_patch_spines_invisible(par2)
+    # Second, show the right spine.
+    par2.spines["right"].set_visible(True)
+
+    areselva_1990_2000 = selvatica.loc[pais, '1990':'2000']
+    gases_1990_2000 = gases.loc[pais, '1990':'2000']
+    poblacion_1990_2000 = poblacion.loc[pais, '1990':'2000']
+
+    p1, = host.plot(areselva_1990_2000.index, areselva_1990_2000.values, "b-", label="Área selvatica")
+    p2, = par1.plot(gases_1990_2000.index, gases_1990_2000.values, "r-", label="Gases efecto invernadero")
+    p3, = par2.plot(poblacion_1990_2000.index, poblacion_1990_2000.values, "g-", label="Población urbana")
+
+    host.set_xlabel("Año")
+    host.set_ylabel("Km2")
+    par1.set_ylabel("CO")
+    par2.set_ylabel("Millones habitantes")
+
+    host.yaxis.label.set_color(p1.get_color())
+    par1.yaxis.label.set_color(p2.get_color())
+    par2.yaxis.label.set_color(p3.get_color())
+
+    tkw = dict(size=4, width=1.5)
+    host.tick_params(axis='y', colors=p1.get_color(), **tkw)
+    par1.tick_params(axis='y', colors=p2.get_color(), **tkw)
+    par2.tick_params(axis='y', colors=p3.get_color(), **tkw)
+    host.tick_params(axis='x', **tkw)
+
+    lines = [p1, p2, p3]
+
+    host.legend(lines, [l.get_label() for l in lines])
+
+    plt.savefig(guardar_como)
+
+    return ''
+
 # Create your views here.
 def index(request):
     # return HttpResponse("You're looking at question %s.")
@@ -106,9 +161,9 @@ def index(request):
         return HttpResponseRedirect(reverse('mapas:index'))
 
     # MacOS
-    ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
+    # ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
     # Windows
-    # ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
+    ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
 
     area_selvatica = volcar(ruta+'files/area_selvatica.csv', ',')
     poblacion_urbana = volcar(ruta+'files/poblacion_urbana.csv', ',')
@@ -117,7 +172,7 @@ def index(request):
 
     # Inicio área selvatica
 
-    '''area_selvatica_pais = area_selvatica.loc[request.POST['Pais'], '1990':'2017']
+    area_selvatica_pais = area_selvatica.loc[request.POST['Pais'], '1990':'2017']
     # Elimina valores NAN
     area_selvatica_values_no_nan = area_selvatica_pais.values[~pd.isnull(area_selvatica_pais.values)]
     estadistica_area_selvatica = estadisticos(area_selvatica_values_no_nan)
@@ -171,7 +226,7 @@ def index(request):
          ruta + 'images/' + png_gases,
          gases_efecto_invernadero,
          request.POST['Pais']
-    )'''
+    )
 
     # Fin gases de efecto invernadero
 
@@ -184,15 +239,17 @@ def index(request):
 
     png_deforestacion = 'deforestacion_' + request.POST['Pais'] + '.png'
 
-    # graficar_deforestacion(deforestacion_pais.index, dentro_de_10_km, fuera_de_10_km, ruta + 'images/' + png_deforestacion)
+    graficar_deforestacion(grupo_por_anio.index, dentro_de_10_km, fuera_de_10_km, ruta + 'images/' + png_deforestacion)
+
+    png_comparativo = 'comparativo_' + request.POST['Pais'] + '.png'
+    graficar_multiple(area_selvatica, gases_efecto_invernadero, poblacion_urbana, request.POST['Pais'], ruta + 'images/' + png_comparativo)
 
     # Fin deforestación
-
 
     deforestacion_pais_json_1 = grupo_por_anio.to_json(orient='split')
     deforestacion_pais_json = pd.Series(fuera_de_10_km).to_json(orient='split')
     deforestacion_pais_json_2 = pd.Series(dentro_de_10_km).to_json(orient='split')
-    return HttpResponse(grupo_por_anio['index']+"<br />"+deforestacion_pais_json+"<br />"+deforestacion_pais_json_2)
+    return HttpResponse(grupo_por_anio.index)
     '''datos_pandas = pd.DataFrame(area_selvatica_pais)
     maximo_area_selvatica_pais = datos_pandas.max()
     json_area_selvatica = area_selvatica_pais.to_json(orient='split')
