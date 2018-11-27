@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 
 import pandas as pd
 import numpy as np
@@ -76,13 +77,13 @@ def graficar_deforestacion(indices, datos_dentro, datos_fuera, guardar_como):
     size_layouts = 9
 
     axes[0].plot(indices, datos_dentro)
-    axes[0].set_ylabel("Dentro", color='r', size=size_layouts)
+    axes[0].set_ylabel("Dentro 10 Km", color='r', size=size_layouts)
     axes[0].get_yaxis().set_major_formatter(
         ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
     axes[0].set_xlabel("Año", color='r', size=size_layouts)
 
     axes[1].plot(indices, datos_fuera)
-    axes[1].set_ylabel("Fuera", color='r', size=size_layouts)
+    axes[1].set_ylabel("Fuera 10 Km", color='r', size=size_layouts)
     axes[1].get_yaxis().set_major_formatter(
         ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
     axes[1].set_xlabel("Año", color='r', size=size_layouts)
@@ -92,7 +93,7 @@ def graficar_deforestacion(indices, datos_dentro, datos_fuera, guardar_como):
     axes[1].legend(["% Deforestación"])
 
     # https://matplotlib.org/gallery/subplots_axes_and_figures/figure_title.html
-    f.suptitle("Deforestación en los parques naturales", fontsize=16)
+    f.suptitle("Deforestación limites de los parques naturales", fontsize=16)
 
     plt.savefig(guardar_como)
     return ''
@@ -127,9 +128,9 @@ def graficar_multiple(selvatica, gases, poblacion, pais, guardar_como, desde, ha
     gases_1990_2000 = gases.loc[pais, desde:hasta]
     poblacion_1990_2000 = poblacion.loc[pais, desde:hasta]
 
-    p1, = host.plot(areselva_1990_2000.index, areselva_1990_2000.values, "b-", label="Área selvatica")
+    p1, = host.plot(areselva_1990_2000.index, areselva_1990_2000.values, "g-", label="Área selvatica")
     p2, = par1.plot(gases_1990_2000.index, gases_1990_2000.values, "r-", label="Gases efecto invernadero")
-    p3, = par2.plot(poblacion_1990_2000.index, poblacion_1990_2000.values, "g-", label="Población urbana")
+    p3, = par2.plot(poblacion_1990_2000.index, poblacion_1990_2000.values, "b-", label="Población urbana")
 
     host.set_xlabel("Año")
     host.set_ylabel("Km2")
@@ -232,14 +233,25 @@ def index(request):
 
     # Inicio deforestación
 
-    deforestacion_pais = deforestacion.loc[request.POST['Pais'], 'year':'inside (up to 10 km from park boundary) deforestation rate in %']
-    grupo_por_anio = deforestacion_pais.groupby(['year']).mean()
-    fuera_de_10_km = grupo_por_anio.values[:,0]
-    dentro_de_10_km = grupo_por_anio.values[:, 1]
+    PaisDeforestacion = request.POST['Pais']
+    if(request.POST['Pais'] == 'Brasil'):
+        PaisDeforestacion = 'Brazil'
 
-    png_deforestacion = 'deforestacion_' + request.POST['Pais'] + '.png'
+    try:
+        deforestacion_pais = deforestacion.loc[PaisDeforestacion,
+                             'year':'inside (up to 10 km from park boundary) deforestation rate in %']
+        grupo_por_anio = deforestacion_pais.groupby(['year']).mean()
+        fuera_de_10_km = grupo_por_anio.values[:, 0]
+        dentro_de_10_km = grupo_por_anio.values[:, 1]
 
-    graficar_deforestacion(grupo_por_anio.index, dentro_de_10_km, fuera_de_10_km, ruta + 'images/' + png_deforestacion)
+        png_deforestacion = 'deforestacion_' + request.POST['Pais'] + '.png'
+
+        graficar_deforestacion(grupo_por_anio.index, dentro_de_10_km, fuera_de_10_km, ruta + 'images/' + png_deforestacion)
+
+    except KeyError:
+        png_deforestacion = ''
+
+
 
     # Fin deforestación
 
@@ -278,20 +290,39 @@ def index(request):
         '2017'
     )
 
+    request.session['pais'] = request.POST['Pais']
+    request.session['area_selvatica'] = png_areasel
+    request.session['estadistica_area_selvatica'] = estadistica_area_selvatica
+    request.session['poblacion_urbana'] = png_poburb
+    request.session['estadistica_poblacion_urbana'] = estadistica_poblacion_urbana
+    request.session['gases_efecto_invernadero'] = png_gases
+    request.session['estadistica_gases_efecto_invernadero'] = estadistica_gases_efecto_invernadero
+    request.session['deforestacion'] = png_deforestacion
+    request.session['comparativo_1990_2000'] = png_comparativo_1990_2000
+    request.session['comparativo_2000_2010'] = png_comparativo_2000_2010
+    request.session['comparativo_2010_2017'] = png_comparativo_2010_2017
+
+    '''request.session['area_selvatica'] = 'area_selvatica_'+request.POST['Pais']+'.png'
+    request.session['poblacion_urbana'] = 'poblacion_urbana_' + request.POST['Pais'] + '.png'
+    request.session['gases_efecto_invernadero'] = 'gases_efecto_invernadero_' + request.POST['Pais'] + '.png'
+    request.session['deforestacion'] = 'deforestacion_' + request.POST['Pais'] + '.png'''
+
     # Fin comparativo
+    return HttpResponseRedirect('/analisis/resultados')
 
-    deforestacion_pais_json_1 = grupo_por_anio.to_json(orient='split')
-    deforestacion_pais_json = pd.Series(fuera_de_10_km).to_json(orient='split')
-    deforestacion_pais_json_2 = pd.Series(dentro_de_10_km).to_json(orient='split')
-    return HttpResponse(grupo_por_anio.index)
-    '''datos_pandas = pd.DataFrame(area_selvatica_pais)
-    maximo_area_selvatica_pais = datos_pandas.max()
-    json_area_selvatica = area_selvatica_pais.to_json(orient='split')
+def resultados(request):
 
-    return render(request, 'analisis/index.html', {
-        'Pais': request.POST['Pais'],
-        'area_selvatica_json': json_area_selvatica,
-        'poblacion_urbana_json': pobliacion_urbana.loc[request.POST['Pais'], '1990':'2017'],
-        'gases_efecto_invernadero_json': gases_efecto_invernadero.loc[request.POST['Pais'], '1990':'2017'],
-        'maximo_area_selvatica_pais': maximo_area_selvatica_pais,
-    })'''
+    return render(request, 'analisis/resultados.html', {
+        'titulo': 'Resultados',
+        'pais': request.session['pais'],
+        'area_selvatica': request.session['area_selvatica'],
+        'poblacion_urbana': request.session['poblacion_urbana'],
+        'gases_efecto_invernadero': request.session['gases_efecto_invernadero'],
+        'deforestacion': request.session['deforestacion'],
+        'estadistica_area_selvatica': request.session['estadistica_area_selvatica'],
+        'estadistica_poblacion_urbana': request.session['estadistica_poblacion_urbana'],
+        'estadistica_gases_efecto_invernadero': request.session['estadistica_gases_efecto_invernadero'],
+        'comparativo_1990_2000': request.session['comparativo_1990_2000'],
+        'comparativo_2000_2010': request.session['comparativo_2000_2010'],
+        'comparativo_2010_2017': request.session['comparativo_2010_2017'],
+    })

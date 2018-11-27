@@ -3,11 +3,22 @@
 <link rel="stylesheet" href="{% static 'mapas/jqvmap/jqvmap.css' %}" />
 
 <script src="{% static 'mapas/js/jquery/jquery.js' %}"></script>
+<script src="{% static 'mapas/js/jquery.blockUI.js' %}"></script>
 <script src="{% static 'mapas/jqvmap/jquery.vmap.js' %}"></script>
 <script src="{% static 'mapas/jqvmap/data/jquery.vmap.sampledata.js' %}"></script>
 <script src="{% static 'mapas/jqvmap/maps/continents/jquery.vmap.south-america.js' %}"></script>
 
 <script type="text/javascript">
+
+json_paises_area_selvatica = '{{json_paises_area_selvatica}}';
+json_paises_area_selvatica = JSON.parse(json_paises_area_selvatica.replace(/&quot;/g,'"'));
+
+json_poblacion_urbana = '{{json_poblacion_urbana}}';
+json_poblacion_urbana = JSON.parse(json_poblacion_urbana.replace(/&quot;/g,'"'));
+
+json_gases_efecto_invernadero = '{{json_gases_efecto_invernadero}}';
+json_gases_efecto_invernadero = JSON.parse(json_gases_efecto_invernadero.replace(/&quot;/g,'"'));
+
 jQuery(document).ready(function() {
     jQuery('#vmap').vectorMap({
         map: 'south-america_en',
@@ -22,8 +33,16 @@ jQuery(document).ready(function() {
         normalizeFunction: 'polynomial',
         onRegionClick: function(element, code, region)
         {
-            jQuery('#Pais').val(region);
-            jQuery('#frmAnalizar').submit();
+            if(jQuery.inArray(region,json_paises_area_selvatica) != -1 && jQuery.inArray(region,json_poblacion_urbana) && jQuery.inArray(region,json_gases_efecto_invernadero)){
+
+                $.blockUI({ message: '<h1>Por favor espere...</h1>' });
+                jQuery('#Pais').val(region);
+                jQuery('#frmAnalizar').submit();
+            }
+            else{
+                alert("El pais seleccionado no cuenta con la información suficiente para ser visualizado.");
+            }
+
         },
 
         onRegionOver: function(element, code, region)
@@ -46,5 +65,4 @@ jQuery(document).ready(function() {
     {% csrf_token %}
     <input type="hidden" name="Pais" id="Pais">
 </form>
-
 </body>
