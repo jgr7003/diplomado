@@ -7,7 +7,7 @@ from django.shortcuts import render
 def tecnologias(request):
 
     return render(request, 'acerca/tecnologias.html', {
-        'titulo': 'Tecnologias'
+        'titulo': 'Tecnologias utilizadas'
     })
 
 def despliegue(request):

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'polls.apps.PollsConfig',
     'mapas.apps.MapasConfig',
     'analisis.apps.AnalisisConfig',
+    'acerca.apps.AcercaConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
