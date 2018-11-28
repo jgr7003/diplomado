@@ -47,6 +47,7 @@ def index(request):
     )
 
     return render(request, 'mapas/index.html', {
+        'titulo': 'Dashboard - Selección de país',
         'json_paises_area_selvatica': json_paises_area_selvatica,
         'json_poblacion_urbana': json_poblacion_urbana,
         'json_gases_efecto_invernadero': json_gases_efecto_invernadero

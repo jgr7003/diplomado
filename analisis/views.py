@@ -246,6 +246,10 @@ def index(request):
 
         png_deforestacion = 'deforestacion_' + request.POST['Pais'] + '.png'
 
+        grupo_por_anio_no_nan = grupo_por_anio.values[~pd.isnull(grupo_por_anio.values)]
+
+        estadistica_deforestacion = estadisticos(grupo_por_anio_no_nan)
+
         graficar_deforestacion(grupo_por_anio.index, dentro_de_10_km, fuera_de_10_km, ruta + 'images/' + png_deforestacion)
 
     except KeyError:
@@ -298,6 +302,7 @@ def index(request):
     request.session['gases_efecto_invernadero'] = png_gases
     request.session['estadistica_gases_efecto_invernadero'] = estadistica_gases_efecto_invernadero
     request.session['deforestacion'] = png_deforestacion
+    request.session['estadistica_deforestacion'] = estadistica_deforestacion
     request.session['comparativo_1990_2000'] = png_comparativo_1990_2000
     request.session['comparativo_2000_2010'] = png_comparativo_2000_2010
     request.session['comparativo_2010_2017'] = png_comparativo_2010_2017
@@ -313,7 +318,7 @@ def index(request):
 def resultados(request):
 
     return render(request, 'analisis/resultados.html', {
-        'titulo': 'Resultados',
+        'titulo': 'Dashboard - Resultados',
         'pais': request.session['pais'],
         'area_selvatica': request.session['area_selvatica'],
         'poblacion_urbana': request.session['poblacion_urbana'],

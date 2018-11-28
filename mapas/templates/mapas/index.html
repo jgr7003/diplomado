@@ -1,68 +1,87 @@
-<head>
+{% extends 'analisis/layout.html' %}
+
 {% load static %}
+
+{% block csspage %}
 <link rel="stylesheet" href="{% static 'mapas/jqvmap/jqvmap.css' %}" />
+{% endblock %}
 
-<script src="{% static 'mapas/js/jquery/jquery.js' %}"></script>
-<script src="{% static 'mapas/js/jquery.blockUI.js' %}"></script>
-<script src="{% static 'mapas/jqvmap/jquery.vmap.js' %}"></script>
-<script src="{% static 'mapas/jqvmap/data/jquery.vmap.sampledata.js' %}"></script>
-<script src="{% static 'mapas/jqvmap/maps/continents/jquery.vmap.south-america.js' %}"></script>
-
-<script type="text/javascript">
-
-json_paises_area_selvatica = '{{json_paises_area_selvatica}}';
-json_paises_area_selvatica = JSON.parse(json_paises_area_selvatica.replace(/&quot;/g,'"'));
-
-json_poblacion_urbana = '{{json_poblacion_urbana}}';
-json_poblacion_urbana = JSON.parse(json_poblacion_urbana.replace(/&quot;/g,'"'));
-
-json_gases_efecto_invernadero = '{{json_gases_efecto_invernadero}}';
-json_gases_efecto_invernadero = JSON.parse(json_gases_efecto_invernadero.replace(/&quot;/g,'"'));
-
-jQuery(document).ready(function() {
-    jQuery('#vmap').vectorMap({
-        map: 'south-america_en',
-        backgroundColor: '#333333',
-        color: '#ffffff',
-        hoverOpacity: 0.7,
-        selectedColor: '#666666',
-        enableZoom: true,
-        showTooltip: true,
-        values: sample_data,
-        scaleColors: ['#C8EEFF', '#006491'],
-        normalizeFunction: 'polynomial',
-        onRegionClick: function(element, code, region)
-        {
-            if(jQuery.inArray(region,json_paises_area_selvatica) != -1 && jQuery.inArray(region,json_poblacion_urbana) && jQuery.inArray(region,json_gases_efecto_invernadero)){
-
-                $.blockUI({ message: '<h1>Por favor espere...</h1>' });
-                jQuery('#Pais').val(region);
-                jQuery('#frmAnalizar').submit();
-            }
-            else{
-                alert("El pais seleccionado no cuenta con la información suficiente para ser visualizado.");
-            }
-
-        },
-
-        onRegionOver: function(element, code, region)
-        {
-            /*var message = 'You estas encima de  "'
-                + region
-                + '" which has the code: '
-                + code.toUpperCase();
-
-            alert(message);*/
-        }
-    });
-});
-</script>
-</head>
-<body>
-<div id="vmap" style="width: 100%; height: 400px;"></div>
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <section class="panel">
+			<header class="panel-heading">
+				<h2 class="panel-title">Sudamerica</h2>
+			</header>
+			<div class="panel-body">
+				<div id="vmap" style="width: 100%; height: 400px;"></div>
+			</div>
+		</section>
+  </div>
+</div>
 
 <form action="{% url 'analisis:index' %}" name="frmAnalizar" id="frmAnalizar" method="post">
     {% csrf_token %}
     <input type="hidden" name="Pais" id="Pais">
 </form>
-</body>
+
+{% endblock %}
+
+{% block jspage %}
+
+    <script src="{% static 'mapas/js/jquery.blockUI.js' %}"></script>
+    <script src="{% static 'mapas/jqvmap/jquery.vmap.js' %}"></script>
+    <script src="{% static 'mapas/jqvmap/data/jquery.vmap.sampledata.js' %}"></script>
+    <script src="{% static 'mapas/jqvmap/maps/continents/jquery.vmap.south-america.js' %}"></script>
+
+    <script type="text/javascript">
+
+    json_paises_area_selvatica = '{{json_paises_area_selvatica}}';
+    json_paises_area_selvatica = JSON.parse(json_paises_area_selvatica.replace(/&quot;/g,'"'));
+
+    json_poblacion_urbana = '{{json_poblacion_urbana}}';
+    json_poblacion_urbana = JSON.parse(json_poblacion_urbana.replace(/&quot;/g,'"'));
+
+    json_gases_efecto_invernadero = '{{json_gases_efecto_invernadero}}';
+    json_gases_efecto_invernadero = JSON.parse(json_gases_efecto_invernadero.replace(/&quot;/g,'"'));
+
+    jQuery(document).ready(function() {
+        jQuery('#vmap').vectorMap({
+            map: 'south-america_en',
+            backgroundColor: '#333333',
+            color: '#ffffff',
+            hoverOpacity: 0.7,
+            selectedColor: '#666666',
+            enableZoom: true,
+            showTooltip: true,
+            values: sample_data,
+            scaleColors: ['#C8EEFF', '#006491'],
+            normalizeFunction: 'polynomial',
+            onRegionClick: function(element, code, region)
+            {
+                if(jQuery.inArray(region,json_paises_area_selvatica) != -1 && jQuery.inArray(region,json_poblacion_urbana) && jQuery.inArray(region,json_gases_efecto_invernadero)){
+
+                    $.blockUI({ message: '<h1>Por favor espere...</h1>' });
+                    jQuery('#Pais').val(region);
+                    jQuery('#frmAnalizar').submit();
+                }
+                else{
+                    alert("El pais seleccionado no cuenta con la información suficiente para ser visualizado.");
+                }
+
+            },
+
+            onRegionOver: function(element, code, region)
+            {
+                /*var message = 'You estas encima de  "'
+                    + region
+                    + '" which has the code: '
+                    + code.toUpperCase();
+
+                alert(message);*/
+            }
+        });
+    });
+    </script>
+
+{% endblock %}
