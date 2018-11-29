@@ -22,9 +22,9 @@ class ComplexEncoder(json.JSONEncoder):
 def index(request):
 
     # MacOS
-    ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
+    # ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
     # Windows
-    # ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
+    ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
 
     area_selvatica = volcar(ruta + 'files/area_selvatica.csv', ',')
     poblacion_urbana = volcar(ruta + 'files/poblacion_urbana.csv', ',')

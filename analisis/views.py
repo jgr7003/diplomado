@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import statistics as st
+import collections
 
 def volcar(archivo, delimitador):
     datos = pd.read_csv(archivo,delimiter=delimitador,decimal=".",index_col=0)
@@ -18,8 +19,12 @@ def estadisticos(values_no_nan):
     est = {
         'maximo': values_no_nan.max(),
         'minimo': values_no_nan.min(),
+        'conteo': collections.Counter(values_no_nan),
         'mediana': st.median(values_no_nan),
-        'desviacion_estandar': np.std(values_no_nan)
+        'media': st.mean(values_no_nan),
+        'desviacion_estandar': np.std(values_no_nan),
+        'varianza': np.var(values_no_nan),
+
     }
     return est
 
@@ -61,6 +66,10 @@ def graficar(label_graf, label_x, label_y, titulo, guardar_como, datos, pais):
     axes[1].legend([label_graf])
     axes[2].legend([label_graf])
 
+    axes[0].grid(True)
+    axes[1].grid(True)
+    axes[2].grid(True)
+
     # https://matplotlib.org/gallery/subplots_axes_and_figures/figure_title.html
     f.suptitle(titulo, fontsize=16)
 
@@ -91,6 +100,9 @@ def graficar_deforestacion(indices, datos_dentro, datos_fuera, guardar_como):
     # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
     axes[0].legend(["% Deforestación"])
     axes[1].legend(["% Deforestación"])
+
+    axes[0].grid(True)
+    axes[1].grid(True)
 
     # https://matplotlib.org/gallery/subplots_axes_and_figures/figure_title.html
     f.suptitle("Deforestación limites de los parques naturales", fontsize=16)
@@ -151,6 +163,8 @@ def graficar_multiple(selvatica, gases, poblacion, pais, guardar_como, desde, ha
 
     host.legend(lines, [l.get_label() for l in lines])
 
+    plt.grid(True)
+
     plt.savefig(guardar_como)
 
     return ''
@@ -162,9 +176,9 @@ def index(request):
         return HttpResponseRedirect(reverse('mapas:index'))
 
     # MacOS
-    ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
+    # ruta = "/Users/jgarcia/diplomado/analisis/static/analisis/"
     # Windows
-    # ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
+    ruta = "C:/Users/jgr70/Documents/diplomado/analisis/static/analisis/"
 
     area_selvatica = volcar(ruta+'files/area_selvatica.csv', ',')
     poblacion_urbana = volcar(ruta+'files/poblacion_urbana.csv', ',')
