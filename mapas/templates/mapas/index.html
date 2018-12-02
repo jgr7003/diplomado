@@ -8,16 +8,18 @@
 
 {% block content %}
 <div class="row">
-  <div class="col-xs-12">
+
+  <div class="col-xs-12 col-md-6">
     <section class="panel">
 			<header class="panel-heading">
 				<h2 class="panel-title">Sudamerica</h2>
 			</header>
 			<div class="panel-body">
-				<div id="vmap" style="width: 100%; height: 400px;"></div>
+				<div id="south-america" style="width: 100%; height: 400px;"></div>
 			</div>
 		</section>
   </div>
+
 </div>
 
 <form action="{% url 'analisis:index' %}" name="frmAnalizar" id="frmAnalizar" method="post">
@@ -46,9 +48,10 @@
     json_gases_efecto_invernadero = JSON.parse(json_gases_efecto_invernadero.replace(/&quot;/g,'"'));
 
     jQuery(document).ready(function() {
-        jQuery('#vmap').vectorMap({
+
+        jQuery('#south-america').vectorMap({
             map: 'south-america_en',
-            backgroundColor: '#333333',
+            backgroundColor: '#ffffff',
             color: '#ffffff',
             hoverOpacity: 0.7,
             selectedColor: '#666666',
@@ -70,16 +73,6 @@
                 }
 
             },
-
-            onRegionOver: function(element, code, region)
-            {
-                /*var message = 'You estas encima de  "'
-                    + region
-                    + '" which has the code: '
-                    + code.toUpperCase();
-
-                alert(message);*/
-            }
         });
     });
     </script>

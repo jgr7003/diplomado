@@ -10,10 +10,10 @@ def tecnologias(request):
         'titulo': 'Tecnologias utilizadas'
     })
 
-def despliegue(request):
+def componentes(request):
 
-    return render(request, 'acerca/despliegue.html', {
-        'titulo': 'Despliegue'
+    return render(request, 'acerca/componentes.html', {
+        'titulo': 'Diagrama de componentes'
     })
 
 def negocio(request):
